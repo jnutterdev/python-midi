@@ -15,6 +15,10 @@ KEY_MAP = {
 active_notes = set()
 
 
+def octave_shift(note, octave):
+    return note + 12 * octave
+
+
 def get_note(key):
     try:
         return KEY_MAP.get(key.char)
