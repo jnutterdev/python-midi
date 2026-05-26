@@ -1,3 +1,5 @@
+from threading import currentThread
+
 import mido
 from pynput import keyboard
 
@@ -12,22 +14,32 @@ KEY_MAP = {
     "k": 72,  # C5
 }
 
+current_octave = 0
 active_notes = set()
 
 
-def octave_shift(note, octave):
-    return note + 12 * octave
+def octave_shift(key):
+    global current_octave
+
+    if key.char == "z":
+        current_octave -= 1
+    elif key.char == "x":
+        current_octave += 1
 
 
 def get_note(key):
     try:
-        return KEY_MAP.get(key.char)
+        note = KEY_MAP.get(key.char)
+        if note is not None:
+            return note + 12 * current_octave
     except AttributeError:
         return None
 
 
 def on_press(key):
+    octave_shift(key)
     note = get_note(key)
+
     if note and note not in active_notes:
         active_notes.add(note)
         port.send(mido.Message("note_on", channel=0, note=note, velocity=80))
