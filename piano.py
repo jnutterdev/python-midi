@@ -12,6 +12,8 @@ KEY_MAP = {
     "k": 72,  # C5
 }
 
+active_notes = set()
+
 
 def get_note(key):
     try:
@@ -22,13 +24,15 @@ def get_note(key):
 
 def on_press(key):
     note = get_note(key)
-    if note:
+    if note and note not in active_notes:
+        active_notes.add(note)
         port.send(mido.Message("note_on", channel=0, note=note, velocity=80))
 
 
 def on_release(key):
     note = get_note(key)
-    if note:
+    if note and note in active_notes:
+        active_notes.discard(note)
         port.send(mido.Message("note_off", channel=0, note=note, velocity=0))
 
 
