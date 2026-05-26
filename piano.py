@@ -20,6 +20,7 @@ KEY_MAP = {
 }
 
 current_octave = 0
+current_velocity = 80
 active_notes = set()
 
 
@@ -34,6 +35,17 @@ def octave_shift(key):
         pass
 
 
+def velocity_shift(key):
+    global current_velocity
+    try:
+        if key.char == "c":
+            current_velocity = max(0, current_velocity - 1)
+        elif key.char == "v":
+            current_velocity = min(127, current_velocity + 1)
+    except AttributeError:
+        return None
+
+
 def get_note(key):
     try:
         note = KEY_MAP.get(key.char)
@@ -45,11 +57,14 @@ def get_note(key):
 
 def on_press(key):
     octave_shift(key)
+    velocity_shift(key)
     note = get_note(key)
 
     if note and note not in active_notes:
         active_notes.add(note)
-        port.send(mido.Message("note_on", channel=0, note=note, velocity=80))
+        port.send(
+            mido.Message("note_on", channel=0, note=note, velocity=current_velocity)
+        )
 
 
 def on_release(key):
