@@ -20,11 +20,13 @@ active_notes = set()
 
 def octave_shift(key):
     global current_octave
-
-    if key.char == "z":
-        current_octave -= 1
-    elif key.char == "x":
-        current_octave += 1
+    try:
+        if key.char == "z":
+            current_octave = max(-4, current_octave - 1)
+        elif key.char == "x":
+            current_octave = min(4, current_octave + 1)
+    except AttributeError:
+        pass
 
 
 def get_note(key):
