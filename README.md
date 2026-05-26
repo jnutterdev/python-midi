@@ -9,7 +9,7 @@ Using python to control midi via a typing keyboard. This is more for practice, s
 
 Dependencies:
 
-- Python 3.14.3
+- Python 3.14.4
 - pynput
 - mido
 
