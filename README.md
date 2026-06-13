@@ -1,6 +1,6 @@
 # Using Python to control Midi
 
-Using python to control midi via a typing keyboard. This is more for practice, so nothing serious.
+Using python to control midi via a typing keyboard on MacOS. This is more for practice, so nothing serious.
 
 - Home row keys are the whole notes (white keys) on a piano, A though K.
 - W, E, T, Y, U are the sharps/flats (black keys) on a piano.
