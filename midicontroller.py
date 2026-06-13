@@ -1,3 +1,6 @@
+import threading
+import tkinter as tk
+
 import mido
 from pynput import keyboard
 
@@ -70,6 +73,18 @@ def on_release(key):
     if note and note in active_notes:
         active_notes.discard(note)
         port.send(mido.Message("note_off", channel=0, note=note, velocity=0))
+
+
+def launch_ui():
+    root = tk.Tk()
+    root.title("MIDI Controller")
+    root.geometry("400x300")
+    tk.Label(root, text="MIDI Controller").pack(pady=20)
+    root.mainloop()
+
+
+ui_thread = threading.Thread(target=launch_ui, daemon=True)
+ui_thread.start()
 
 
 with mido.open_output("IAC Driver Bus 1") as port:  # type: ignore
