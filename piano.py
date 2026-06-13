@@ -1,5 +1,3 @@
-from threading import currentThread
-
 import mido
 from pynput import keyboard
 
