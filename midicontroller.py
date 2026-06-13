@@ -108,7 +108,6 @@ with mido.open_output("IAC Driver Bus 1") as port:
     root.configure(bg="#1a1b26")
     root.resizable(False, False)
 
-    # Tokyo Night colors
     BG = "#1a1b26"
     PANEL = "#1f2335"
     BORDER = "#3b4261"
@@ -118,16 +117,28 @@ with mido.open_output("IAC Driver Bus 1") as port:
     BLUE = "#7aa2f7"
     MAGENTA = "#bb9af7"
 
-    # Fonts
     MONO = ("Courier New", 11)
     MONO_LG = ("Courier New", 24, "bold")
     MONO_SM = ("Courier New", 9)
 
-    # Stat cards frame
+    # Stat cards
+    def make_stat_card(parent, label, value, color):
+        frame = tk.Frame(parent, bg=PANEL, padx=12, pady=10)
+        frame.pack(side="left", expand=True, fill="x", padx=(0, 8))
+        tk.Label(frame, text=label.upper(), bg=PANEL, fg=COMMENT, font=MONO_SM).pack(
+            anchor="w"
+        )
+        val_label = tk.Label(frame, text=value, bg=PANEL, fg=color, font=MONO_LG)
+        val_label.pack(anchor="w")
+        return val_label
+
     cards_frame = tk.Frame(root, bg=BG)
     cards_frame.pack(padx=16, pady=(16, 8), fill="x")
+    octave_label = make_stat_card(cards_frame, "Octave", "+0", CYAN)
+    velocity_label = make_stat_card(cards_frame, "Velocity", "80", BLUE)
+    channel_label = make_stat_card(cards_frame, "Channel", "1", MAGENTA)
 
-    # Active notes panel
+    # Active notes
     notes_frame = tk.Frame(root, bg=PANEL, padx=12, pady=10)
     notes_frame.pack(padx=16, pady=(0, 8), fill="x")
     tk.Label(notes_frame, text="ACTIVE NOTES", bg=PANEL, fg=COMMENT, font=MONO_SM).pack(
@@ -138,19 +149,37 @@ with mido.open_output("IAC Driver Bus 1") as port:
     )
     notes_label.pack(anchor="w", pady=(4, 0))
 
-    # Velocity slider panel
+    # Velocity slider
+    def on_slider_change(val):
+        global current_velocity
+        current_velocity = int(val)
+        update_labels()
+
+    velocity_var = tk.IntVar(value=current_velocity)
     slider_frame = tk.Frame(root, bg=PANEL, padx=12, pady=10)
     slider_frame.pack(padx=16, pady=(0, 8), fill="x")
     tk.Label(slider_frame, text="VELOCITY", bg=PANEL, fg=COMMENT, font=MONO_SM).pack(
         anchor="w"
     )
-
-    velocity_var = tk.IntVar(value=current_velocity)
+    slider = tk.Scale(
+        slider_frame,
+        from_=0,
+        to=127,
+        orient="horizontal",
+        variable=velocity_var,
+        command=on_slider_change,
+        bg=PANEL,
+        fg=FG,
+        troughcolor=BORDER,
+        activebackground=BLUE,
+        highlightthickness=0,
+        sliderrelief="flat",
+        bd=0,
+        showvalue=False,
+    )
+    slider.pack(fill="x", pady=(4, 0))
 
     # Buttons
-    buttons_frame = tk.Frame(root, bg=BG)
-    buttons_frame.pack(padx=16, pady=(0, 16), fill="x")
-
     def panic():
         for note in list(active_notes):
             port.send(mido.Message("note_off", channel=0, note=note, velocity=0))
@@ -170,6 +199,8 @@ with mido.open_output("IAC Driver Bus 1") as port:
             fg=CYAN if sustain_on else COMMENT,
         )
 
+    buttons_frame = tk.Frame(root, bg=BG)
+    buttons_frame.pack(padx=16, pady=(0, 16), fill="x")
     panic_btn = tk.Button(
         buttons_frame,
         text="PANIC — ALL NOTES OFF",
@@ -184,7 +215,6 @@ with mido.open_output("IAC Driver Bus 1") as port:
         pady=8,
     )
     panic_btn.pack(side="left", expand=True, fill="x", padx=(0, 8))
-
     sustain_btn = tk.Button(
         buttons_frame,
         text="SUSTAIN: OFF",
@@ -199,43 +229,6 @@ with mido.open_output("IAC Driver Bus 1") as port:
         pady=8,
     )
     sustain_btn.pack(side="left", expand=True, fill="x")
-
-    def on_slider_change(val):
-        global current_velocity
-        current_velocity = int(val)
-        update_labels()
-
-    slider = tk.Scale(
-        slider_frame,
-        from_=0,
-        to=127,
-        orient="horizontal",
-        variable=velocity_var,
-        command=on_slider_change,
-        bg=PANEL,
-        fg=FG,
-        troughcolor=BORDER,
-        activebackground=BLUE,
-        highlightthickness=0,
-        sliderrelief="flat",
-        bd=0,
-        showvalue=False,
-    )
-    slider.pack(fill="x", pady=(4, 0))
-
-    def make_stat_card(parent, label, value, color):
-        frame = tk.Frame(parent, bg=PANEL, padx=12, pady=10)
-        frame.pack(side="left", expand=True, fill="x", padx=(0, 8))
-        tk.Label(frame, text=label.upper(), bg=PANEL, fg=COMMENT, font=MONO_SM).pack(
-            anchor="w"
-        )
-        val_label = tk.Label(frame, text=value, bg=PANEL, fg=color, font=MONO_LG)
-        val_label.pack(anchor="w")
-        return val_label
-
-    octave_label = make_stat_card(cards_frame, "Octave", "+0", CYAN)
-    velocity_label = make_stat_card(cards_frame, "Velocity", "80", BLUE)
-    channel_label = make_stat_card(cards_frame, "Channel", "1", MAGENTA)
 
     root.bind("<KeyPress>", on_press)
     root.bind("<KeyRelease>", on_release)
